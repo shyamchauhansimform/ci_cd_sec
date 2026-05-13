@@ -5,7 +5,7 @@ REQUIRED_SECRET_ENV_VARS = ("API_KEY", "AWS_ACCESS_KEY_ID")
 
 
 def has_required_credentials():
-    """Return whether all required credentials are present in the environment."""
+    """Return whether all required credentials have non-empty environment values."""
     return all(os.getenv(name) for name in REQUIRED_SECRET_ENV_VARS)
 
 
