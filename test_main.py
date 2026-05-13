@@ -23,16 +23,14 @@ class HelloGhostTests(unittest.TestCase):
             }
         )
 
-        self.assertIn("API key configured: yes", output)
-        self.assertIn("AWS access key configured: yes", output)
+        self.assertIn("Credentials loaded from environment.", output)
         self.assertNotIn("demo-api-token", output)
         self.assertNotIn("demo-aws-access-key", output)
 
     def test_hello_ghost_reports_missing_secrets_without_leaking(self):
         output = self.capture_output({})
 
-        self.assertIn("API key configured: no", output)
-        self.assertIn("AWS access key configured: no", output)
+        self.assertIn("Set required credentials via environment variables before use.", output)
 
 
 if __name__ == "__main__":
