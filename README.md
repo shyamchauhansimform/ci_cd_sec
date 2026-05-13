@@ -71,7 +71,6 @@ sonar-scanner
 GitHub Actions workflows run automatically on:
 - Push to main branch
 - Pull requests
-- Scheduled daily scans
 
 ## Contributing
 
