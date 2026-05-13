@@ -36,9 +36,8 @@ This project focuses on implementing and maintaining robust security practices i
 git clone https://github.com/shyamchauhansimform/ci_cd_sec.git
 cd ci_cd_sec
 
-# Install Python dependencies
-pip install -r requirements.txt
-
+# Python setup
+# No requirements.txt is currently provided in this repository.
 # Install Node.js dependencies
 npm install
 ```
