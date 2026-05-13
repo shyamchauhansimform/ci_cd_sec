@@ -1,18 +1,24 @@
 import os
 
-# This is a demonstration of how secrets can be accidentally committed
-# DO NOT use real credentials in your code!
+
+API_KEY_ENV_VAR = "API_KEY"
+AWS_ACCESS_KEY_ID_ENV_VAR = "AWS_ACCESS_KEY_ID"
 
 
-# ⚠️ BAD PRACTICE - Secret hardcoded in code
-API_KEY = "ghp_1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r"
-AWS_ACCESS_KEY_ID = "AKIAYVP4CIIWF3XOKKXP"chain-benchch
+def is_secret_configured(name):
+    """Return whether a secret is configured without exposing its value."""
+    return bool(os.getenv(name))
 
 
 def hello_ghost():
-    """Simple function to demonstrate secret leakage."""
+    """Simple function to demonstrate safe secret handling."""
     print("Hello Ghost!")
-    print(f"API Key: {API_KEY[:10]}...")  # Shows partial key
+    print(f"API key configured: {'yes' if is_secret_configured(API_KEY_ENV_VAR) else 'no'}")
+    print(
+        "AWS access key configured: "
+        f"{'yes' if is_secret_configured(AWS_ACCESS_KEY_ID_ENV_VAR) else 'no'}"
+    )
+
 
 if __name__ == "__main__":
     hello_ghost()

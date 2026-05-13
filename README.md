@@ -17,6 +17,7 @@ This project focuses on implementing and maintaining robust security practices i
 ## Features
 
 - **CVE Scanning** — Automated vulnerability detection in dependencies
+- **Secret Scanning** — Automated detection of hardcoded secrets in the repository contents
 - **Code Quality Analysis** — SonarQube integration for code quality metrics
 - **GitHub Actions Automation** — Automated security checks in CI/CD pipelines
 - **Pipeline Security** — Best practices for securing deployment workflows
@@ -57,6 +58,10 @@ sonar.sources=.
 ### CVE Scanning
 
 GitHub Actions workflow automatically scans for CVEs in dependencies. See `.github/workflows/cve-lite-cli.yml` for configuration.
+
+### Secret Scanning
+
+GitHub Actions also runs a Gitleaks-based secret scan to catch hardcoded credentials before they are merged. Keep AWS keys, tokens, and similar credentials in GitHub Actions secrets or other secure secret managers instead of committing them to the repository. If a real credential is ever exposed, rotate it outside the repository and remove it from active use immediately.
 
 ### Code Quality
 
