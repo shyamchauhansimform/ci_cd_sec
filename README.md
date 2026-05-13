@@ -81,7 +81,7 @@ GitHub Actions workflows run automatically on:
 
 ## License
 
-[Add your license here]
+This project is licensed under the MIT License.
 
 ## Contact
 
