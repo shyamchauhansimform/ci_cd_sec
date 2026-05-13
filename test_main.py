@@ -7,7 +7,7 @@ from unittest.mock import patch
 import main
 
 
-class HelloGhostTests(unittest.TestCase):
+class SecretHandlingTests(unittest.TestCase):
     def capture_output(self, environment):
         with patch.dict(os.environ, environment, clear=True):
             buffer = io.StringIO()
