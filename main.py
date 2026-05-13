@@ -13,7 +13,9 @@ def is_secret_configured(name):
 def hello_ghost():
     """Simple function to demonstrate safe secret handling."""
     print("Hello Ghost!")
-    print(f"API key configured: {'yes' if is_secret_configured(API_KEY_ENV_VAR) else 'no'}")
+    print(
+        f"API key configured: {'yes' if is_secret_configured(API_KEY_ENV_VAR) else 'no'}"
+    )
     print(
         "AWS access key configured: "
         f"{'yes' if is_secret_configured(AWS_ACCESS_KEY_ID_ENV_VAR) else 'no'}"
