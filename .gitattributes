@@ -1,0 +1,12 @@
+# Ensure shell scripts always use LF so they are executable on Linux
+*.sh text eol=lf
+
+# Python and JS source files
+*.py text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+
+# Windows files keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
