@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "description": "Security audit hooks for GitHub Copilot Coding Agent",
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "description": "Log every tool execution before it runs",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash -c 'mkdir -p .github/logs && echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] [PRE_TOOL] tool=${TOOL_NAME} session=${CLAUDE_SESSION_ID:-unknown} input=$(echo \"${TOOL_INPUT}\" | head -c 512)\" >> .github/logs/tool-executions.log'"
+        }
+      ]
+    },
+    {
+      "event": "PostToolUse",
+      "description": "Log tool completion and exit status",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash -c 'mkdir -p .github/logs && echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] [POST_TOOL] tool=${TOOL_NAME} session=${CLAUDE_SESSION_ID:-unknown} exit_code=${TOOL_EXIT_CODE:-0}\" >> .github/logs/tool-executions.log'"
+        }
+      ]
+    },
+    {
+      "event": "SessionStart",
+      "description": "Record when a new agent session begins",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash -c 'mkdir -p .github/logs && echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] [SESSION_START] session=${CLAUDE_SESSION_ID:-unknown} agent=copilot-coding-agent repo=${GITHUB_REPOSITORY:-local}\" >> .github/logs/session-audit.log'"
+        }
+      ]
+    },
+    {
+      "event": "Stop",
+      "description": "Record when an agent session ends",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash -c 'mkdir -p .github/logs && echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] [SESSION_END] session=${CLAUDE_SESSION_ID:-unknown} agent=copilot-coding-agent\" >> .github/logs/session-audit.log'"
+        }
+      ]
+    },
+    {
+      "event": "PreToolUse",
+      "description": "Block high-risk destructive commands (security gate)",
+      "matcher": {
+        "tool_name": "Bash",
+        "input": {
+          "command": "^(rm -rf|curl.*\\| *sh|wget.*\\| *sh|chmod 777|sudo rm|dd if=)"
+        }
+      },
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash -c 'mkdir -p .github/logs && echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] [SECURITY_BLOCK] BLOCKED high-risk command session=${CLAUDE_SESSION_ID:-unknown} cmd=$(echo \"${TOOL_INPUT}\" | head -c 256)\" >> .github/logs/security-blocks.log' ; exit 2"
+        }
+      ]
+    }
+  ]
+}
