@@ -421,21 +421,41 @@ def write_gha_summary(all_vulns, repo):
             f"| 🟡 Medium   | {counts.get('MEDIUM', 0)} |",
             f"| 🟢 Low      | {counts.get('LOW', 0)} |",
             "",
-            "## Findings\n",
-            "| Package | Version | CVE | Severity | Fix Available | Description |",
-            "|---------|---------|-----|----------|---------------|-------------|",
         ]
-        sorted_vulns = sorted(all_vulns, key=lambda v: severity_order(v["severity"]))
-        for v in sorted_vulns:
-            emoji = SEV_EMOJI.get(v["severity"], "⚪")
-            fix   = f"`{v['fixed_in'][0]}`" if v["fix_available"] else "—"
-            desc  = (v.get("summary") or "No description available.")
-            desc  = (desc[:120] + "…") if len(desc) > 120 else desc
-            desc  = desc.replace("|", "\\|")
-            lines.append(
-                f"| `{v['package']}` | `{v['version']}` | [{v['vuln_id']}]({v['web_url']}) "
-                f"| {emoji} {v['severity']} | {fix} | {desc} |"
-            )
+
+        # Group findings by severity bucket
+        SEVERITY_GROUPS = [
+            ("CRITICAL", "🔴 Critical"),
+            ("HIGH",     "🟠 High"),
+            ("MEDIUM",   "🟡 Medium"),
+            ("MODERATE", "🟡 Moderate"),
+            ("LOW",      "🟢 Low"),
+            ("UNKNOWN",  "⚪ Unknown"),
+        ]
+
+        TABLE_HEADER = [
+            "| Package | Version | CVE | Fix Available | Description |",
+            "|---------|---------|-----|---------------|-------------|",
+        ]
+
+        for sev_key, sev_label in SEVERITY_GROUPS:
+            group = [v for v in all_vulns if v["severity"].upper() == sev_key]
+            if not group:
+                continue
+
+            lines += [f"## {sev_label} ({len(group)})\n", *TABLE_HEADER]
+
+            for v in sorted(group, key=lambda v: v["package"]):
+                fix  = f"`{v['fixed_in'][0]}`" if v["fix_available"] else "—"
+                desc = (v.get("summary") or "No description available.")
+                desc = (desc[:120] + "…") if len(desc) > 120 else desc
+                desc = desc.replace("|", "\\|")
+                lines.append(
+                    f"| `{v['package']}` | `{v['version']}` | [{v['vuln_id']}]({v['web_url']}) "
+                    f"| {fix} | {desc} |"
+                )
+
+            lines.append("")
 
     with open(summary_file, "w") as f:
         f.write("\n".join(lines))
