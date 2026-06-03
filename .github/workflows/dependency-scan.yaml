@@ -1,0 +1,67 @@
+name: Dependency Vulnerability Scan
+
+on:
+  schedule:
+    # Every day at 8:00 AM UTC
+    - cron: '*/3 * * * *'
+  push:
+    branches: [main, master]
+    paths:
+      # Only re-run when a manifest file actually changes
+      - '**/package.json'
+      - '**/package-lock.json'
+      - '**/yarn.lock'
+      - '**/requirements.txt'
+      - '**/Pipfile'
+      - '**/pyproject.toml'
+      - '**/go.mod'
+      - '**/Cargo.toml'
+      - '**/Gemfile.lock'
+      - '**/pom.xml'
+      - '**/build.gradle'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '**/package.json'
+      - '**/requirements.txt'
+      - '**/go.mod'
+      - '**/Cargo.toml'
+      - '**/Gemfile.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vulnerability-scan:
+    name: Scan Dependencies for CVEs
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout repo so scan.py is available ───────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python is pre-installed on ubuntu-latest; pin it cleanly ────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          # Zero pip installs — scan.py uses stdlib only (urllib, json, os, sys)
+
+      # ── 3. Run the scanner ─────────────────────────────────────────────────
+      - name: Run vulnerability scan
+        env:
+          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: python scan.py
+
+      # ── 4. Upload raw results artifact ─────────────────────────────────────
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln-scan-results-${{ github.run_number }}
+          path: scan_results.json
+          if-no-files-found: ignore
+          retention-days: 30
