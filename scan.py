@@ -464,12 +464,13 @@ def write_gha_summary(all_vulns, repo):
                 fixes = [e["fixed_in"][0] for e in entries if e["fix_available"]]
                 fix   = f"`{max(fixes)}`" if fixes else "—"
 
-                # Join descriptions, truncate each to 80 chars so row stays readable
+                # Join descriptions with <br> so each CVE gets its own line in the cell
                 descs = []
                 for e in entries:
                     d = (e.get("summary") or "No description.").replace("|", "\\|")
-                    descs.append((d[:80] + "…") if len(d) > 80 else d)
-                desc = " / ".join(descs)
+                    d = (d[:80] + "…") if len(d) > 80 else d
+                    descs.append(f"**{e['vuln_id']}**: {d}")
+                desc = "<br>".join(descs)
 
                 lines.append(
                     f"| `{pkg}` | `{ver}` | {cves} | {fix} | {desc} |"
