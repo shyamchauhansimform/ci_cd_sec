@@ -422,16 +422,19 @@ def write_gha_summary(all_vulns, repo):
             f"| 🟢 Low      | {counts.get('LOW', 0)} |",
             "",
             "## Findings\n",
-            "| Package | Version | CVE | Severity | Fix Available | Details |",
-            "|---------|---------|-----|----------|---------------|---------|",
+            "| Package | Version | CVE | Severity | Fix Available | Description |",
+            "|---------|---------|-----|----------|---------------|-------------|",
         ]
         sorted_vulns = sorted(all_vulns, key=lambda v: severity_order(v["severity"]))
         for v in sorted_vulns:
-            emoji    = SEV_EMOJI.get(v["severity"], "⚪")
-            fix      = v["fixed_in"][0] if v["fix_available"] else "—"
+            emoji = SEV_EMOJI.get(v["severity"], "⚪")
+            fix   = f"`{v['fixed_in'][0]}`" if v["fix_available"] else "—"
+            desc  = (v.get("summary") or "No description available.")
+            desc  = (desc[:120] + "…") if len(desc) > 120 else desc
+            desc  = desc.replace("|", "\\|")
             lines.append(
                 f"| `{v['package']}` | `{v['version']}` | [{v['vuln_id']}]({v['web_url']}) "
-                f"| {emoji} {v['severity']} | `{fix}` | [OSV]({v['web_url']}) |"
+                f"| {emoji} {v['severity']} | {fix} | {desc} |"
             )
 
     with open(summary_file, "w") as f:
