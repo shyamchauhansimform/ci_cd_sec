@@ -2,31 +2,14 @@ name: Dependency Vulnerability Scan
 
 on:
   schedule:
-    # Every day at 8:00 AM UTC
+    # Daily at 8:00 AM UTC — catches new CVEs even if dependencies haven't changed
     - cron: '0 8 * * *'
   push:
+    # Always scan on push — a new CVE could affect unchanged dependencies
     branches: [main, master]
-    paths:
-      # Only re-run when a manifest file actually changes
-      - '**/package.json'
-      - '**/package-lock.json'
-      - '**/yarn.lock'
-      - '**/requirements.txt'
-      - '**/Pipfile'
-      - '**/pyproject.toml'
-      - '**/go.mod'
-      - '**/Cargo.toml'
-      - '**/Gemfile.lock'
-      - '**/pom.xml'
-      - '**/build.gradle'
   pull_request:
+    # Catch vulnerable deps being introduced in a PR before they merge
     branches: [main, master]
-    paths:
-      - '**/package.json'
-      - '**/requirements.txt'
-      - '**/go.mod'
-      - '**/Cargo.toml'
-      - '**/Gemfile.lock'
   workflow_dispatch:
 
 permissions:

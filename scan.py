@@ -445,14 +445,34 @@ def write_gha_summary(all_vulns, repo):
 
             lines += [f"## {sev_label} ({len(group)})\n", *TABLE_HEADER]
 
-            for v in sorted(group, key=lambda v: v["package"]):
-                fix  = f"`{v['fixed_in'][0]}`" if v["fix_available"] else "—"
-                desc = (v.get("summary") or "No description available.")
-                desc = (desc[:120] + "…") if len(desc) > 120 else desc
-                desc = desc.replace("|", "\\|")
+            # Collapse multiple CVEs for the same package+version into one row
+            from collections import defaultdict
+            pkg_map = defaultdict(list)
+            for v in group:
+                pkg_map[(v["package"], v["version"])].append(v)
+
+            for (pkg, ver) in sorted(pkg_map.keys()):
+                entries = pkg_map[(pkg, ver)]
+
+                # Merge CVE links: GHSA-111, GHSA-222
+                cves = " ".join(
+                    f"[{e['vuln_id']}]({e['web_url']})"
+                    for e in entries
+                )
+
+                # Best fix = highest version available across all CVEs
+                fixes = [e["fixed_in"][0] for e in entries if e["fix_available"]]
+                fix   = f"`{max(fixes)}`" if fixes else "—"
+
+                # Join descriptions, truncate each to 80 chars so row stays readable
+                descs = []
+                for e in entries:
+                    d = (e.get("summary") or "No description.").replace("|", "\\|")
+                    descs.append((d[:80] + "…") if len(d) > 80 else d)
+                desc = " / ".join(descs)
+
                 lines.append(
-                    f"| `{v['package']}` | `{v['version']}` | [{v['vuln_id']}]({v['web_url']}) "
-                    f"| {fix} | {desc} |"
+                    f"| `{pkg}` | `{ver}` | {cves} | {fix} | {desc} |"
                 )
 
             lines.append("")
